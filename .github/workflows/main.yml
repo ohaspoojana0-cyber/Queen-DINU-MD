@@ -1,26 +1,22 @@
-name: WhatsApp Bot CI
+const { Client } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+const client = new Client();
 
-jobs:
-  run-bot:
-    runs-on: ubuntu-latest
+client.on('qr', qr => {
+    qrcode.generate(qr, { small: true });
+    console.log('Scan QR code to log in.');
+});
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+client.on('ready', () => {
+    console.log('WhatsApp Bot is ready!');
+});
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+client.on('message', message => {
+    console.log(`Message received: ${message.body}`);
+    if (message.body.toLowerCase() === 'hi') {
+        message.reply('Hello! I am your bot 🤖');
+    }
+});
 
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run WhatsApp Bot
-        run: npm start
+client.initialize();
